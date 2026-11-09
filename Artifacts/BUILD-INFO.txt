@@ -1,0 +1,5 @@
+CTPM.xcframework, built by scripts/build-ctpm.sh
+OpenSSL 3.5.9  https://github.com/openssl/openssl/releases/download/openssl-3.5.9/openssl-3.5.9.tar.gz  sha256 603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a
+libtpms 0.10.2  https://github.com/stefanberger/libtpms/archive/refs/tags/v0.10.2.tar.gz  sha256 edac03680f8a4a1c5c1d609a10e3f41e1a129e38ff5158f0c8deaedc719fb127
+arm64, macOS 15.0 or later; Apple clang version 21.0.0 (clang-2100.3.34.2); macOS 27.2
+libCTPM.a sha256 cb11b8ee5aaa96be3ad0d998a300a3389f531b1083af0a8b674b51b71b42862e
