@@ -27,6 +27,8 @@ public final class TPMEngine: @unchecked Sendable {
 
     private let lock = NSLock()
     private var running = false
+    /// The command and response size the running TPM was started with.
+    public private(set) var bufferSize: UInt32 = 0
     fileprivate var permanent: Data?
     fileprivate var onPermanentChange: (@Sendable (Data) -> Void)?
 
@@ -35,13 +37,19 @@ public final class TPMEngine: @unchecked Sendable {
     /// Starts the TPM: a new one, made with `profile`, when `permanentState` is nil; else the TPM that
     /// state is. `volatileState` (from `volatileState()`) resumes it as it was when the VM was saved.
     /// `onPermanentStateChange` gets the new permanent state after every command that changes it.
+    /// `bufferSize` is the largest command and response the transport carries (a CRB buffer's size, say);
+    /// the TPM reports it as TPM_PT_MAX_COMMAND_SIZE and TPM_PT_MAX_RESPONSE_SIZE, so a guest never builds
+    /// a command, or gets a response, the buffer can't hold. Nil keeps libtpms' 4096.
     public func start(permanentState: Data?, volatileState: Data? = nil, profile: String = TPMEngine.defaultProfile,
+                      bufferSize: UInt32? = nil,
                       onPermanentStateChange: @escaping @Sendable (Data) -> Void) throws {
         lock.lock(); defer { lock.unlock() }
         if running { TPMLIB_Terminate(); running = false }
         permanent = permanentState
         onPermanentChange = onPermanentStateChange
         try check("TPMLIB_ChooseTPMVersion", TPMLIB_ChooseTPMVersion(TPMLIB_TPM_VERSION_2))
+        // Before TPMLIB_MainInit. libtpms clamps it to what it supports and says what it chose.
+        self.bufferSize = TPMLIB_SetBufferSize(bufferSize ?? 0, nil, nil)
         var callbacks = libtpms_callbacks()
         callbacks.sizeOfStruct = Int32(MemoryLayout<libtpms_callbacks>.size)
         callbacks.tpm_nvram_init = { TPM_RESULT(TPM_SUCCESS) }

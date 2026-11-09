@@ -81,6 +81,21 @@ struct TPMEngineTests {
         #expect(Self.rc(try tpm.process(Self.getRandom)) == 0)
     }
 
+    @Test func theBufferSizeIsTheLargestCommandAndResponse() throws {
+        let tpm = TPMEngine.shared
+        try tpm.start(permanentState: nil, bufferSize: 3968) { _ in }
+        defer { tpm.stop() }
+        #expect(tpm.bufferSize == 3968)
+        #expect(Self.rc(try tpm.process(Self.startup)) == 0)
+        // TPM2_GetCapability(TPM_CAP_TPM_PROPERTIES, TPM_PT_MAX_COMMAND_SIZE / TPM_PT_MAX_RESPONSE_SIZE, 1).
+        for property: UInt8 in [0x1e, 0x1f] {
+            let ask = Data([0x80, 0x01, 0, 0, 0, 0x16, 0, 0, 0x01, 0x7a, 0, 0, 0, 0x06, 0, 0, 0x01, property, 0, 0, 0, 0x01])
+            let answer = try tpm.process(ask)
+            #expect(Self.rc(answer) == 0)
+            #expect(answer.suffix(4).reduce(0) { $0 << 8 | UInt32($1) } == 3968)
+        }
+    }
+
     @Test func aStoppedTPMRefusesCommands() {
         TPMEngine.shared.stop()
         #expect(throws: TPMEngine.Failure.notRunning) { try TPMEngine.shared.process(Self.getRandom) }
