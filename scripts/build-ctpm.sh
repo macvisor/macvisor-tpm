@@ -35,14 +35,17 @@ rm -rf $B/work $B/prefix
 mkdir -p $B/work $B/prefix
 PREFIX=$B/prefix
 export MACOSX_DEPLOYMENT_TARGET=$MIN_MACOS
-CFLAGS_COMMON="-arch arm64 -mmacosx-version-min=$MIN_MACOS -O2 -fvisibility=hidden"
+# -fno-common: uninitialised globals go in __bss with their own alignment, not __common, where
+# libtpms' NV image (s_NV, 173 KB) asked for 32 KB and the linker warned that it cut that to the
+# 16 KB a segment allows when MacVisor linked the library (14 Nov 2026).
+CFLAGS_COMMON="-arch arm64 -mmacosx-version-min=$MIN_MACOS -O2 -fvisibility=hidden -fno-common"
 
 print "▸ OpenSSL $OPENSSL_VERSION (libcrypto, static)"
 tar -xzf $B/src/openssl-$OPENSSL_VERSION.tar.gz -C $B/work
 (
   cd $B/work/openssl-$OPENSSL_VERSION
   ./Configure darwin64-arm64-cc no-shared no-tests no-apps no-docs no-module no-dso no-engine no-legacy \
-    --prefix=$PREFIX --libdir=lib "-mmacosx-version-min=$MIN_MACOS" > $B/openssl-configure.log 2>&1
+    --prefix=$PREFIX --libdir=lib "-mmacosx-version-min=$MIN_MACOS" -fno-common > $B/openssl-configure.log 2>&1
   make -j$JOBS build_libs > $B/openssl-build.log 2>&1
   make install_dev > $B/openssl-install.log 2>&1
 )
