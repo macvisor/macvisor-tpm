@@ -1,8 +1,8 @@
 # macvisor-tpm
 
 A TPM 2.0 for virtual machines on macOS, as a Swift package: [libtpms](https://github.com/stefanberger/libtpms)
-and OpenSSL's libcrypto, built static from their release tarballs, behind a small Swift API. MacVisor uses it
-to give Windows 11 and Linux guests a virtual TPM under Apple's Virtualization.framework.
+and OpenSSL's libcrypto, built static from their release tarballs, behind a small Swift API. [MacVisor](https://scaleninja.com/macvisor/)
+uses it to give Windows 11 and Linux guests a virtual TPM under Apple's Virtualization.framework.
 
 ```swift
 import MacVisorTPM
