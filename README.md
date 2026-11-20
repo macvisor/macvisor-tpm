@@ -5,6 +5,7 @@ and OpenSSL's libcrypto, built static from their release tarballs, behind a smal
 uses it to give Windows 11 and Linux guests a virtual TPM under Apple's Virtualization.framework.
 
 Blog post: https://scaleninja.com/blog/bitlocker-tpm-virtualization-framework/
+
 Get MacVisor: https://scaleninja.com/macvisor/
 
 ```swift
